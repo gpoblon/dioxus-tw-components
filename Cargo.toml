@@ -1,5 +1,5 @@
 [package]
-name = "dioxus_tw_components"
+name = "dioxus-tw-components"
 version = "0.2.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
