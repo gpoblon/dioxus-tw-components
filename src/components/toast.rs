@@ -1,9 +1,6 @@
 use crate::{components::icon::*, use_unique_id};
 use dioxus::prelude::*;
 
-#[cfg(target_arch = "wasm32")]
-use gloo_timers::future::TimeoutFuture;
-
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum ToastColor {
     #[default]
@@ -292,51 +289,17 @@ fn ToastView(mut state: Signal<ToasterState>, toast: ReadSignal<Toast>) -> Eleme
     //   });
     use_future(move || async move {
         if toast_animation != ToastAnimation::None {
-            #[cfg(target_arch = "wasm32")]
-            {
-                TimeoutFuture::new(10).await;
-            }
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let _ = tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-            }
+            crate::sleep_ms(10).await;
             toast_state.set(ToastState::Open);
 
             let animation_play_time = 150;
             let animation_duration = duration_in_ms.saturating_sub(animation_play_time);
-            #[cfg(target_arch = "wasm32")]
-            {
-                TimeoutFuture::new(animation_duration).await;
-            }
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let _ =
-                    tokio::time::sleep(std::time::Duration::from_millis(animation_duration as u64))
-                        .await;
-            }
+            crate::sleep_ms(animation_duration as u64).await;
 
             toast_state.set(ToastState::Closing);
-            #[cfg(target_arch = "wasm32")]
-            {
-                TimeoutFuture::new(animation_play_time).await;
-            }
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let _ = tokio::time::sleep(std::time::Duration::from_millis(
-                    animation_play_time as u64,
-                ))
-                .await;
-            }
+            crate::sleep_ms(animation_play_time as u64).await;
         } else {
-            #[cfg(target_arch = "wasm32")]
-            {
-                TimeoutFuture::new(duration_in_ms).await;
-            }
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let _ = tokio::time::sleep(std::time::Duration::from_millis(duration_in_ms as u64))
-                    .await;
-            }
+            crate::sleep_ms(duration_in_ms as u64).await;
         }
 
         state.set(ToasterState::default());
@@ -369,14 +332,7 @@ fn ToastClose(mut state: Signal<ToasterState>, mut toast_state: Signal<ToastStat
             onclick: move |_| {
                 spawn(async move {
                     toast_state.set(ToastState::Closing);
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        TimeoutFuture::new(150).await;
-                    }
-                    #[cfg(not(target_arch = "wasm32"))]
-                    {
-                        let _ = tokio::time::sleep(std::time::Duration::from_millis(150)).await;
-                    }
+                    crate::sleep_ms(150).await;
                     state.set(ToasterState::default());
                 });
             },

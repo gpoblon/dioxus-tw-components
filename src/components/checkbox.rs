@@ -25,37 +25,12 @@ pub fn Checkbox(mut props: CheckboxProps) -> Element {
     let mut checked = use_signal(|| props.default_checked);
 
     let id = crate::use_unique_id();
-    let id_clone = id.clone();
 
     // HTML's default checkbox input are notoriously difficult to style consistently across browsers.
-    // This one uses a common pattern using a fake box for look and real input for sementics and
+    // This one uses a common pattern using a fake box for look and real input for semantics and
     // form integration, aria-hidden to prevent duplication.
     // The hidden native input ensures that assistive technologies (like screen readers) still
     // recognize the component as a proper checkbox.
-    use_effect(move || {
-        let checked = *checked.read();
-        let js = document::eval(
-            r#"
-            let id = await dioxus.recv();
-            let action = await dioxus.recv();
-            let input = document.getElementById(id);
-
-            switch(action) {
-                case "checked":
-                    input.checked = true;
-                    input.indeterminate = false;
-                    break;
-                case "unchecked": 
-                    input.checked = false;
-                    input.indeterminate = false;
-                    break;
-            }
-            "#,
-        );
-
-        let _ = js.send(id_clone.clone());
-        let _ = js.send(if checked { "checked" } else { "unchecked" });
-    });
 
     rsx! {
         button {
@@ -88,7 +63,8 @@ pub fn Checkbox(mut props: CheckboxProps) -> Element {
         }
         input {
             id,
-            type: "checkbox",
+            r#type: "checkbox",
+            checked: *checked.read(),
             aria_hidden: "true",
             tabindex: "-1",
             position: "absolute",

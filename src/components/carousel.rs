@@ -113,16 +113,14 @@ pub fn CarouselWindow(mut props: CarouselWindowProps) -> Element {
     let mut carousel_state = use_context::<Signal<CarouselState>>();
 
     use_effect(move || {
-        let mut timer = document::eval(&format!(
-            "setInterval(() => {{
-                dioxus.send(true);
-            }}, {});",
-            // Do not read signal due to carousel_state write just bellow which will cause carousel to have panic attack when autoscolling
-            carousel_state.peek().autoscroll_duration
-        ));
+        let autoscroll_duration = carousel_state.peek().autoscroll_duration;
+        if autoscroll_duration == 0 {
+            return;
+        }
         spawn(async move {
-            while (timer.recv::<bool>().await).is_ok() {
-                // Same as above
+            loop {
+                crate::sleep_ms(autoscroll_duration as u64).await;
+
                 if carousel_state.peek().autoscroll_duration != 0
                     && !carousel_state.peek().block_autoscoll
                 {

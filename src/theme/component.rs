@@ -180,29 +180,18 @@ fn ColorSelector(
 
 #[component]
 fn ToggleDiv(is_selected: bool, onclick: EventHandler<MouseEvent>, children: Element) -> Element {
-    let onclick = move |event| {
-        onclick.call(event);
-
-        // This is to trigger the click event on the color picker input
-        // Will only work with web
-        spawn(async move {
-            let _eval = document::eval(
-                r#"
-                const input = document.getElementById("color-picker-input");
-                if (input != null) {
-                    input.click();
-                }
-                "#,
-            );
-        });
-    };
-
+    // Using a <label> with `for` attribute to trigger the color picker input
+    // This is pure HTML and works cross-platform without eval
     rsx! {
-        div {
+        label {
+            r#for: "color-picker-input",
             role: "button",
             class: "theme-toggle-div",
             "data-selected": is_selected,
-            onclick,
+            onclick: move |event| {
+                onclick.call(event);
+                // The label's `for` attribute will automatically trigger the input click
+            },
             {children}
         }
     }

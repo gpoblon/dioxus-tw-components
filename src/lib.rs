@@ -38,6 +38,7 @@ pub mod theme;
 
 use dioxus::dioxus_core::{Attribute, AttributeValue};
 use dioxus::prelude::*;
+use std::time::Duration;
 
 pub(crate) fn setup_class_attribute(attributes: &mut Vec<Attribute>, default_classes: &str) {
     // Find the class attribute in the vec and modify it
@@ -55,6 +56,11 @@ use std::sync::atomic::AtomicUsize;
 
 const ID_PREFIX: &str = "dx42-";
 static UNIQUE_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+/// Cross-platform async sleep using dioxus-sdk-time.
+pub(crate) async fn sleep_ms(ms: u64) {
+    dioxus_sdk_time::sleep(Duration::from_millis(ms)).await;
+}
 
 pub(crate) fn use_unique_id() -> String {
     format!(
